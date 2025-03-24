@@ -1,24 +1,18 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import TaskManager from "./TaskManager"; // Import your Task Manager component
+import { Layout } from "antd";
+import "antd/dist/reset.css"; // Ensure Ant Design styles are applied
+
+const { Header, Content } = Layout;
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Layout style={{ minHeight: "100vh" }}>
+      <Header style={{ color: "white", fontSize: "20px" }}>Task Manager</Header>
+      <Content style={{ padding: "20px" }}>
+        <TaskManager />
+      </Content>
+    </Layout>
   );
 }
 

@@ -8,7 +8,7 @@ const TaskManager = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null);
+  const [selectedTaskOutput, setSelectedTaskOutput] = useState("");
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -28,9 +28,12 @@ const TaskManager = () => {
 
   const handleCreate = async (values) => {
     try {
-      await axios.post(API_URL, values);
+      await axios.post(`${API_URL}/create`, values, {
+        headers: { "Content-Type": "application/json" },
+      });
       message.success("Task created successfully");
       fetchTasks();
+      form.resetFields();
     } catch (error) {
       message.error("Failed to create task");
     }
@@ -39,10 +42,20 @@ const TaskManager = () => {
   const handleExecute = async (taskId) => {
     try {
       const response = await axios.put(`${API_URL}/${taskId}/execute`);
-      setSelectedTask(response.data);
+      setSelectedTaskOutput(response.data);
       setIsModalVisible(true);
     } catch (error) {
       message.error("Execution failed");
+    }
+  };
+
+  const handleDelete = async (taskId) => {
+    try {
+      await axios.delete(`${API_URL}/${taskId}`);
+      message.success("Task deleted successfully");
+      fetchTasks();
+    } catch (error) {
+      message.error("Failed to delete task");
     }
   };
 
@@ -51,18 +64,23 @@ const TaskManager = () => {
     { title: "Name", dataIndex: "name", key: "name" },
     { title: "Command", dataIndex: "command", key: "command" },
     {
-      title: "Action",
-      key: "action",
+      title: "Actions",
+      key: "actions",
       render: (text, record) => (
-        <Button type="primary" onClick={() => handleExecute(record.id)}>
-          Execute
-        </Button>
+        <>
+          <Button type="primary" onClick={() => handleExecute(record.id)} style={{ marginRight: 8 }}>
+            Execute
+          </Button>
+          <Button type="danger" onClick={() => handleDelete(record.id)}>
+            Delete
+          </Button>
+        </>
       ),
     },
   ];
 
   return (
-    <div style={{ padding: 20 }}>
+    <div style={{ padding: 20, maxWidth: 800, margin: "auto" }}>
       <h1>Task Manager</h1>
       <Form form={form} onFinish={handleCreate} layout="inline">
         <Form.Item name="name" rules={[{ required: true, message: "Enter task name" }]}> 
@@ -78,11 +96,11 @@ const TaskManager = () => {
       <Table columns={columns} dataSource={tasks} loading={loading} rowKey="id" style={{ marginTop: 20 }} />
       <Modal
         title="Task Execution Result"
-        visible={isModalVisible}
+        open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={null}
       >
-        {selectedTask && <p>Output: {selectedTask.output}</p>}
+        <p>{selectedTaskOutput}</p>
       </Modal>
     </div>
   );
